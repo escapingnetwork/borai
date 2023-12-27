@@ -1,0 +1,34 @@
+# .github/workflows/only-publish-borai.yml
+
+name: "Only Publish BORAI"
+
+on:
+  push:
+    paths:
+      - '**.json'
+permissions:
+  contents: write
+jobs:
+  publish-borai:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run publisher script
+        env:
+          X_BEARER: ${{ secrets.X_BEARER }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_KEY_SECRET: ${{ secrets.X_API_KEY_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          URBIT_SHIP: ${{ secrets.URBIT_SHIP }}
+          URBIT_SHIP_URL: ${{ secrets.URBIT_SHIP_URL }}
+          URBIT_SHIP_CODE: ${{ secrets.URBIT_SHIP_CODE }}
+          URBIT_DIARY: ${{ secrets.URBIT_DIARY }}
+        run: python publisher/main.py

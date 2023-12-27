@@ -1,0 +1,49 @@
+# .github/workflows/update-borai.yml
+
+name: "Publish BORAI"
+
+on:
+  schedule:
+    - cron: '15 4 * * 1-5'
+  push:
+    branches:
+      - 'main'
+permissions:
+  contents: write
+jobs:
+  publish-borai:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run etl tests
+        run: python -m pytest etl/tests
+      - name: Run etl script
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: python etl/main.py
+      - name: Run publisher script
+        env:
+          X_BEARER: ${{ secrets.X_BEARER }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_KEY_SECRET: ${{ secrets.X_API_KEY_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          URBIT_SHIP: ${{ secrets.URBIT_SHIP }}
+          URBIT_SHIP_URL: ${{ secrets.URBIT_SHIP_URL }}
+          URBIT_SHIP_CODE: ${{ secrets.URBIT_SHIP_CODE }}
+          URBIT_DIARY: ${{ secrets.URBIT_DIARY }}
+        run: python publisher/main.py
+      - name: Commit and push
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add data.json
+          git commit -m "update data"
+          git push origin main
