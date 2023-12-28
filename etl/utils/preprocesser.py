@@ -1,53 +1,40 @@
-import tiktoken
+from typing import List
 import datetime
+from tiktoken import Tokenizer
 
-def chop(
-    text: str, 
-    chunk_size=4000, 
-    overlap=200,
-) -> list:
+CHUNK_SIZE = 4000
+OVERLAP = 200
+INPUT_FORMAT = '%d/%m/%Y'
+OUTPUT_FORMAT = '%Y-%m-%d'
+
+def chop(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = OVERLAP) -> List[str]:
     """
     Takes a text as input and returns a list
     of chunks of max size chunk_size. GPT tokens
     are used to determine the chunk size.
-    Inputs:
-    * text: Input text
-    * chunk_size: Max tokens per chunk
-    overlap: Overlapping tokens with previos/next chunk.
-    Returns:
-    List of text chunks.
     """
-    encoding = tiktoken.get_encoding("gpt2")
+    tokenizer = Tokenizer()
 
-    tokens = encoding.encode(text)
+    tokens = tokenizer.tokenize(text)
     num_tokens = len(tokens)
     
     chunks = []
     for i in range(0, num_tokens, chunk_size - overlap):
         chunk = tokens[i:i + chunk_size]
-        chunks.append(chunk)
-    chunks = [encoding.decode(chunk) for chunk in chunks]
+        chunks.append(''.join(chunk))
     
     return chunks
 
-def transform_date(
-        date: str,
-        input_format: str = '%d/-%m/%Y',
-        output_format: str = '%Y-%m-%d',
-) -> str:
+def transform_date(date: str, input_format: str = INPUT_FORMAT, output_format: str = OUTPUT_FORMAT) -> str:
     """
     Transform str date from input format to
     output format.
-    Parameters:
-    * date: desired str date to transofrm
-    * input_format: original date format 
-    * output_format: desired date format
-    Returns:
-    New str date with desired format.
     """
-    # Read date as actual format
-    date = datetime.datetime.strptime(date, '%d/%m/%Y')
-    # Transform to desired format
-    date = date.strftime('%Y-%m-%d')
+    try:
+        date = datetime.datetime.strptime(date, input_format)
+        date = date.strftime(output_format)
+    except ValueError as e:
+        print(f"Error occurred: {e}")
+        return None
 
     return date

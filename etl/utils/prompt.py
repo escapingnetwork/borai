@@ -1,23 +1,17 @@
 import os
 import time
+import logging
 
 from dotenv import load_dotenv
-load_dotenv()
-
-# Google
-import pathlib
-import textwrap
-
 import google.generativeai as genai
 
-# Used to securely store your API key
-# from google.colab import userdata
+load_dotenv()
 
 delimiter = "####"
 MAX_TOKENS = 4096
-# openai.api_key  = os.getenv('OPENAI_API_KEY')
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
+SLEEP_DELAY = 20
 
+genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
 def get_completion(prompt, model="gemini-pro"): 
     gemini = genai.GenerativeModel(model)
@@ -35,7 +29,7 @@ def summarize(chunks):
         response = get_completion(prompt)
 
     else:
-        print(f"{len(chunks)} chunks. Please wait!")
+        logging.info(f"{len(chunks)} chunks. Please wait!")
         initial_response = ''
         for i, chunk in enumerate(chunks):
             prompt = f"""
@@ -49,17 +43,9 @@ def summarize(chunks):
                 Review: {delimiter}{chunk}{delimiter}
             """
             initial_response += get_completion(prompt)
-            time.sleep(20)
-            print(f"{i+1} done.")
+            time.sleep(SLEEP_DELAY)
+            logging.info(f"{i+1} done.")
 
-        prompt = f"""
-            Resumir el siguiente texto de manera formal en 140 caracteres maximo, \
-            no decorar con caracteres especiales, ni hashtags, solo texto simple.
+        response = initial_response
 
-            Texto:{delimiter}{initial_response}{delimiter}
-        """
-        response = get_completion(prompt)
-
-    tags = []
-    
-    return tags, 0, response
+    return response

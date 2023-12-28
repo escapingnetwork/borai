@@ -1,56 +1,65 @@
 import json
 import time
 import datetime
-
+import logging
 
 from utils import scraper, loader, prompt, preprocesser
 
+AREAS_OF_INTEREST = ["Resoluciones", "Leyes", "Decretos", "Disposiciones"]
+RETRY_DELAY = 20
 
-areas_of_interest = ["Resoluciones", "Leyes", "Decretos", "Disposiciones"]
+def process_url(url):
+    """
+    Process the given URL by scraping the article, preprocessing the content,
+    summarizing it, and loading the publication to a JSON file.
+
+    Args:
+        url (str): The URL of the article to process.
+
+    Returns:
+        None
+    """
+    logging.info(f"Processing {url}")
+    type, area, content, _ = scraper.scrape_article(url)
+
+    if type not in AREAS_OF_INTEREST:
+        logging.info(f"Area: {area} not in Areas Of Interest.")
+        return
+
+    chunks = preprocesser.chop(content)
+    date = datetime.date.today()
+
+    try:
+        tags, score, summary = prompt.summarize(chunks)
+    except Exception as error:
+        logging.error(f"{error}, Retrying in {RETRY_DELAY}s...")
+        time.sleep(RETRY_DELAY)
+        tags, score, summary = prompt.summarize(chunks)
+
+    publication = {
+        'date': str(date),
+        'area': area,
+        'url': url,
+        'type': type,
+        'summary': summary,
+        'score': score
+    }
+
+    logging.info('Publication Created')
+    logging.info(publication)
+
+    loader.json_loader(publication)
+    logging.info("Loaded to json")
+
 def main():
-    ## To execute manualy on a particular date replace urls with a list of urls from that date
     urls, _ = scraper.today_urls()
     urls = list(dict.fromkeys(urls))
-    print(f"{len(urls)} Publications found.")
-    print('***************')
+    logging.info(f"{len(urls)} Publications found.")
 
     for i, url in enumerate(urls):
-        print(f"Publication {i+1} of {len(urls)}")
-        type, area, content, _ = scraper.scrape_article(url)
-        print('Completed Scraping')
-
-        if type  in areas_of_interest:
-            chunks = preprocesser.chop(content)
-            date = datetime.date.today()
-            # date = datetime.datetime(2023, 12, 20)
-            print('Completed Preprocessing')
-
-            try:
-                tags, score, summary = prompt.summarize(chunks)
-            except () as error:
-                print(error, "\n Retrying in 20s...")
-                time.sleep(20)
-                tags, score, summary = prompt.summarize(chunks)
-
-            print('Completed Extraction')
-
-            publication = {
-                'date': str(date),
-                'area': area,
-                'url': url,
-                'type': type,
-                'summary': summary,
-                'score': score
-            }
-
-            print('Publication Created')
-            print(publication)
-
-            loader.json_loader(publication)
-            print("Loaded to json")
-        else:
-            print(f"Area: {area} not in Areas Of Interest.")
-        print('***************')
+        logging.info(f"Publication {i+1} of {len(urls)}")
+        process_url(url)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     main()

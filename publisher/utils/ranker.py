@@ -1,29 +1,25 @@
 import datetime
+from typing import List, Dict
 
-def ranker(
-        data: list,
+def filter_publications_by_date_and_score(
+        data: List[Dict],
         threshold: int = 75,
         date: datetime = datetime.datetime.today()
-) -> list:
+) -> List[Dict]:
     """
-    Reads list of json publications and returns
-    data filtered by threshold and actual date.
-    Input:
-    data: list with json publications
-    threshold: minimum value for score
+    Filters a list of publications by date and score.
+
+    Parameters:
+    data (List[Dict]): The data to filter.
+    threshold (int): The minimum score a publication must have to be included. Defaults to 75.
+    date (datetime): The date the publications must match. Defaults to today's date.
+
     Returns:
-    filtered data
+    List[Dict]: The filtered data.
     """
-    data = [
+    date_str = date.strftime('%Y-%m-%d')
+    return [
         publication
         for publication in data
-        if publication['date'] == str(date.strftime('%Y-%m-%d'))
+        if publication['date'] == date_str and publication['score'] >= threshold
     ]
-
-    data = [
-        publication
-        for publication in data
-        if publication['score'] >= threshold
-    ]
-
-    return data

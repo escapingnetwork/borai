@@ -2,86 +2,83 @@ import datetime
 import tweepy
 import os
 import json
-
-## URLOCK
 import urlock
 import time
+import logging
 
 from jinja2 import Environment, FileSystemLoader
-
 from utils.reader import reader
 from utils.preprocesser import sort_by
 from utils.ranker import ranker
 
-
 FILEPATH = './data.json'
-TWEET_MAX_LENGTH = 327
+TWEET_MAX_LENGTH_WITH_LINK = 327
+TWEET_MAX_LENGTH = 280
 
 today = str(datetime.datetime.today().strftime('%Y-%m-%d'))
-# today = str(datetime.datetime(2023, 12, 22).strftime('%Y-%m-%d'))
 
+def validate_length(data):
+    exceeded = False
+    for entry in data:
+        if len(entry['summary']) > TWEET_MAX_LENGTH:
+            logging.warning(f"Summary exceeded 280 characters: {entry}")
+            exceeded = True
+    return exceeded
 
 def main():
+    """
+    This is the main function that executes the publishing process.
+
+    It reads data from a file, ranks the data, sorts it, connects to an Urbit ship,
+    renders templates, creates tweets, and publishes them.
+
+    Returns:
+        None
+    """
     data = reader(FILEPATH)
-    data = ranker(data, threshold=0) #date= datetime.datetime(2023, 12, 22).date())
+    data = ranker(data, threshold=0)
     data = sort_by(data)
     env = Environment(loader=FileSystemLoader('templates'))
 
+    if validate_length(data):
+        return
 
-    # Validate Length 
-    exceeded = False
-    for x in data:
-        if len(x['summary']) > 280:
-            print(x)
-            exceeded = True
-    
-    if exceeded:
-        return True
-
-
-    # Urbit
     ship = urlock.Urlock(os.getenv('URBIT_SHIP_URL'), os.getenv('URBIT_SHIP_CODE'))
-    r = ship.connect()
+    connection_status = ship.connect()
 
-    shipName = os.getenv('URBIT_SHIP')
+    ship_name = os.getenv('URBIT_SHIP')
     diary = os.getenv('URBIT_DIARY')
 
-    template = env.get_template('note.j2')
-    rendered_note = template.render(results=data, today=today, types=set([x['type'] for x in data]), nest="diary/~" + shipName + "/" + diary, ship="~" + shipName, time=int(time.time() * 1000))
+    templates = {
+        'note': env.get_template('note.j2'),
+        'head': env.get_template('head.j2'),
+        'post': env.get_template('post.j2'),
+        'area': env.get_template('area.j2'),
+        'summary': env.get_template('summary.j2')
+    }
+
+    rendered_note = templates['note'].render(results=data, today=today, types=set([entry['type'] for entry in data]), nest=f"diary/~{ship_name}/{diary}", ship=f"~{ship_name}", time=int(time.time() * 1000))
     note = json.loads(rendered_note)
-    p = ship.poke(shipName, "channels", "channel-action", note)
-
-
-    # X
+    poke_response = ship.poke(ship_name, "channels", "channel-action", note)
 
     client = tweepy.Client(bearer_token=os.getenv('X_BEARER'), consumer_key=os.getenv('X_API_KEY'), consumer_secret=os.getenv('X_API_KEY_SECRET'), access_token=os.getenv('X_ACCESS_TOKEN'), access_token_secret=os.getenv('X_ACCESS_TOKEN_SECRET'), wait_on_rate_limit=True)
 
-    types = set([x['type'] for x in data])
-    for t in types:
-        xPostTemplate = env.get_template('head.j2')
-        tweet = xPostTemplate.render(today=today, type=t)
-        original_tweet = client.create_tweet(text=tweet)
-        for x in data:
-            if t == x['type']:
-                xPostTemplate = env.get_template('post.j2')
-                tweet = xPostTemplate.render(publication=x, today=today, type=x['type'])
-                if len(tweet) > TWEET_MAX_LENGTH:
-                    xPostTemplate = env.get_template('area.j2')
-                    area = xPostTemplate.render(publication=x, today=today, type=x['type'])
-                    reply_tweet = client.create_tweet(text=area, 
-                                            in_reply_to_tweet_id=original_tweet.data['id'])
-                    xPostTemplate = env.get_template('summary.j2')
-                    summary = xPostTemplate.render(publication=x, today=today, type=x['type'])
-                    reply2_tweet = client.create_tweet(text=summary, 
-                                                in_reply_to_tweet_id=reply_tweet.data['id'])
+    types = set([entry['type'] for entry in data])
+    for type in types:
+        tweet_text = templates['head'].render(today=today, type=type)
+        original_tweet = client.create_tweet(text=tweet_text)
+        for entry in data:
+            if type == entry['type']:
+                tweet_text = templates['post'].render(publication=entry, today=today, type=entry['type'])
+                if len(tweet_text) > TWEET_MAX_LENGTH_WITH_LINK:
+                    area_text = templates['area'].render(publication=entry, today=today, type=entry['type'])
+                    reply_tweet = client.create_tweet(text=area_text, in_reply_to_tweet_id=original_tweet.data['id'])
+                    summary_text = templates['summary'].render(publication=entry, today=today, type=entry['type'])
+                    reply2_tweet = client.create_tweet(text=summary_text, in_reply_to_tweet_id=reply_tweet.data['id'])
                     original_tweet = reply2_tweet
                 else:   
-                    reply_tweet = client.create_tweet(text=tweet, 
-                                                in_reply_to_tweet_id=original_tweet.data['id'])
+                    reply_tweet = client.create_tweet(text=tweet_text, in_reply_to_tweet_id=original_tweet.data['id'])
                     original_tweet = reply_tweet
-
-                
-
 
 if __name__ == "__main__":
     main()
