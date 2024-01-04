@@ -10,7 +10,6 @@ areas_of_interest = ["Resoluciones", "Leyes", "Decretos", "Disposiciones"]
 def main():
     ## To execute manualy on a particular date replace urls with a list of urls from that date
     urls, _ = scraper.today_urls()
-    urls = list(dict.fromkeys(urls))
     print(f"{len(urls)} Publications found.")
     print('***************')
 

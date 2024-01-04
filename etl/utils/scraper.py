@@ -15,11 +15,15 @@ def today_urls():
     soup = BeautifulSoup(page.content, "html.parser")
     body = soup.find(id='avisosSeccionDiv')
 
-    urls = [
-        base_url + a['href']
-        for a in body.find_all("a", href=True)
-    ]
+    urls = []
 
+    for a in body.find_all("a", href=True):
+        url = base_url + remove_query_params(a['href'])
+        urls.append(url)
+    
+
+
+    urls = list(dict.fromkeys(urls))
     return urls, status
 
 def scrape_article(article_url):
@@ -42,3 +46,5 @@ def scrape_article(article_url):
 
     return type, area, content, status
 
+def remove_query_params(url):
+    return url.split('?')[0]
