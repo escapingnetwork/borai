@@ -33,20 +33,22 @@ def main():
 
             print('Completed Extraction')
 
-            publication = {
-                'date': str(date),
-                'area': area,
-                'url': url,
-                'type': type,
-                'summary': summary,
-                'score': score
-            }
+            if len(summary) > 0:
 
-            print('Publication Created')
-            print(publication)
+                publication = {
+                    'date': str(date),
+                    'area': area,
+                    'url': url,
+                    'type': type,
+                    'summary': summary,
+                    'score': score
+                }
 
-            loader.json_loader(publication)
-            print("Loaded to json")
+                print('Publication Created')
+                print(publication)
+
+                loader.json_loader(publication)
+                print("Loaded to json")
         else:
             print(f"Area: {area} not in Areas Of Interest.")
         print('***************')
