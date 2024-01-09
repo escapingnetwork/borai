@@ -22,7 +22,8 @@ genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 def get_completion(prompt, model="gemini-pro"): 
     gemini = genai.GenerativeModel(model)
     response = gemini.generate_content(prompt)
-    if len(response.parts) == 0:
+    if len(response.candidates) == 0 or len(response.parts) == 0:
+        print(response)
         return ""
     return response.text
 
