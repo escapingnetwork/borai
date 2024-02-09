@@ -49,7 +49,7 @@ def main():
     template = env.get_template('note.j2')
     rendered_note = template.render(results=data, today=today, types=set([x['type'] for x in data]), nest="diary/~" + shipName + "/" + diary, ship="~" + shipName, time=int(time.time() * 1000))
     note = json.loads(rendered_note)
-    p = ship.poke(shipName, "channels", "channel-action", note)
+    ship.poke(shipName, "channels", "channel-action", note)
 
 
     # X
@@ -80,8 +80,9 @@ def main():
                                                 in_reply_to_tweet_id=original_tweet.data['id'])
                     original_tweet = reply_tweet
 
-                
-
+    xResume = env.get_template('notePost.j2')
+    resume_tweet = xResume.render(today=today)
+    client.create_tweet(text=resume_tweet)
 
 if __name__ == "__main__":
     main()
