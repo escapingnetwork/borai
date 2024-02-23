@@ -3,6 +3,7 @@
 name: "Only Publish BORAI"
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '**.json'

@@ -3,8 +3,9 @@
 name: "Publish BORAI"
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '15 4 * * 1-5'
+    - cron: '10 3 * * 1-5'
   push:
     branches:
       - 'main'
