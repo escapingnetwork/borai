@@ -1,6 +1,6 @@
 import os
 import time
-
+from tenacity import retry
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -18,7 +18,7 @@ MAX_TOKENS = 4096
 # openai.api_key  = os.getenv('OPENAI_API_KEY')
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
-
+@retry
 def get_completion(prompt, model="gemini-pro"): 
     gemini = genai.GenerativeModel(model)
     response = gemini.generate_content(prompt)
