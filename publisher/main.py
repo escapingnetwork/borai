@@ -56,6 +56,10 @@ def main():
 
     client = tweepy.Client(bearer_token=os.getenv('X_BEARER'), consumer_key=os.getenv('X_API_KEY'), consumer_secret=os.getenv('X_API_KEY_SECRET'), access_token=os.getenv('X_ACCESS_TOKEN'), access_token_secret=os.getenv('X_ACCESS_TOKEN_SECRET'), wait_on_rate_limit=True)
 
+    xResume = env.get_template('notePost.j2')
+    resume_tweet = xResume.render(today=today)
+    client.create_tweet(text=resume_tweet)
+
     types = set([x['type'] for x in data])
     for t in types:
         xPostTemplate = env.get_template('head.j2')
@@ -79,10 +83,6 @@ def main():
                     reply_tweet = client.create_tweet(text=tweet, 
                                                 in_reply_to_tweet_id=original_tweet.data['id'])
                     original_tweet = reply_tweet
-
-    xResume = env.get_template('notePost.j2')
-    resume_tweet = xResume.render(today=today)
-    client.create_tweet(text=resume_tweet)
 
 if __name__ == "__main__":
     main()
