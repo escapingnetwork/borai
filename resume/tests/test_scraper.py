@@ -1,8 +1,8 @@
-"""Tests for etl.utils.scraper"""
+"""Tests for resume.utils.scraper"""
 
 import pytest
 
-from etl.utils.scraper import today_urls, scrape_article
+from resume.utils.scraper import today_urls, scrape_article
 
 
 def test_today_uurls_type(mock_today_urls):

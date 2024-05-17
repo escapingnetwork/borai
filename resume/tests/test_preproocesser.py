@@ -1,8 +1,8 @@
-"""Tests  for etl.utils.preprocesser"""
+"""Tests  for resume.utils.preprocesser"""
 
 import pytest
 
-from  etl.utils.preprocesser import transform_date, chop
+from  resume.utils.preprocesser import transform_date, chop
 
 
 def test_transform_date():
