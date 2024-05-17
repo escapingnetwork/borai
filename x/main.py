@@ -38,20 +38,6 @@ def main():
     if exceeded:
         return True
 
-
-    # Urbit
-    ship = urlock.Urlock(os.getenv('URBIT_SHIP_URL'), os.getenv('URBIT_SHIP_CODE'))
-    r = ship.connect()
-
-    shipName = os.getenv('URBIT_SHIP')
-    diary = os.getenv('URBIT_DIARY')
-
-    template = env.get_template('note.j2')
-    rendered_note = template.render(results=data, today=today, types=set([x['type'] for x in data]), nest="diary/~" + shipName + "/" + diary, ship="~" + shipName, time=int(time.time() * 1000))
-    note = json.loads(rendered_note)
-    ship.poke(shipName, "channels", "channel-action", note)
-
-
     # X
 
     client = tweepy.Client(bearer_token=os.getenv('X_BEARER'), consumer_key=os.getenv('X_API_KEY'), consumer_secret=os.getenv('X_API_KEY_SECRET'), access_token=os.getenv('X_ACCESS_TOKEN'), access_token_secret=os.getenv('X_ACCESS_TOKEN_SECRET'), wait_on_rate_limit=True)
@@ -80,9 +66,6 @@ def main():
                                                 in_reply_to_tweet_id=original_tweet.data['id'])
                     original_tweet = reply_tweet
 
-    xResume = env.get_template('notePost.j2')
-    resume_tweet = xResume.render(today=today)
-    client.create_tweet(text=resume_tweet)
 
 if __name__ == "__main__":
     main()
