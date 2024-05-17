@@ -58,7 +58,7 @@ X_ACCESS_TOKEN_SECRET
 
 Run the script for scrapping with Python:
 ```bash
-python etl/main.py
+python resume/main.py
 
 ```
 
