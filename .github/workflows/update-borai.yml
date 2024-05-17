@@ -23,12 +23,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Run etl tests
-        run: python -m pytest etl/tests
-      - name: Run etl script
+      - name: Run resume tests
+        run: python -m pytest resume/tests
+      - name: Run resume script
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-        run: python etl/main.py
+        run: python resume/main.py
       - name: Run urbit publisher script
         env:
           X_BEARER: ${{ secrets.X_BEARER }}
