@@ -32,4 +32,6 @@ jobs:
           URBIT_SHIP_URL: ${{ secrets.URBIT_SHIP_URL }}
           URBIT_SHIP_CODE: ${{ secrets.URBIT_SHIP_CODE }}
           URBIT_DIARY: ${{ secrets.URBIT_DIARY }}
-        run: python publisher/main.py
+        run: |
+          python urbit/main.py
+          python x/main.py
