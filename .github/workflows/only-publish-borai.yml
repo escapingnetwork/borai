@@ -32,9 +32,15 @@ jobs:
           URBIT_SHIP_URL: ${{ secrets.URBIT_SHIP_URL }}
           URBIT_SHIP_CODE: ${{ secrets.URBIT_SHIP_CODE }}
           URBIT_DIARY: ${{ secrets.URBIT_DIARY }}
+<<<<<<< HEAD
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
         run: |
           python urbit/main.py
           python x/main.py
           python telegram/main.py
+=======
+        run: |
+          python urbit/main.py
+          python x/main.py
+>>>>>>> 637ae0c61b37604c2eb9eef754d35804e528e810
