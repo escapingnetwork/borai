@@ -42,7 +42,7 @@ async def send_message(message):
 # Example usage
 if __name__ == "__main__":
     data = reader(FILEPATH)
-    data = ranker(data, threshold=0, date=today)
+    data = ranker(data, threshold=0)
     data = sort_by(data)
 
     env = Environment(loader=FileSystemLoader('templates'))
