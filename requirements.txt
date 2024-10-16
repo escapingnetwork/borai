@@ -9,3 +9,4 @@ tweepy
 google-generativeai
 urlock
 tenacity
+pyTelegramBotAPI
