@@ -6,7 +6,7 @@ import datetime
 from utils import scraper, loader, prompt, preprocesser
 
 
-areas_of_interest = ["Resoluciones", "Leyes", "Decretos", "Disposiciones"]
+areas_of_interest = ["Resoluciones", "Resoluciones Generales", "Resoluciones Conjuntas","Tratados Y Convenios Internacionales", "Leyes", "Decretos", "Disposiciones"]
 def main():
     ## To execute manualy on a particular date replace urls with a list of urls from that date
     urls, _ = scraper.today_urls()
