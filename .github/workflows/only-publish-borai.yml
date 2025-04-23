@@ -1,12 +1,11 @@
-# .github/workflows/only-publish-borai.yml
-
 name: "Only Publish BORAI"
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - '**.json'
+      - 'data/*.json'
+      - 'summaries/*.md'
 permissions:
   contents: write
 jobs:
@@ -14,14 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-go@v3
         with:
-          python-version: '3.12'
+          go-version: '1.21'
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run publisher script
+        run: go mod tidy
+      - name: Run publisher scripts
         env:
           X_BEARER: ${{ secrets.X_BEARER }}
           X_API_KEY: ${{ secrets.X_API_KEY }}
@@ -35,6 +32,6 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
         run: |
-          python urbit/main.py
-          python x/main.py
-          python telegram/main.py
+          go run ./cmd/urbit
+          go run ./cmd/x
+          go run ./cmd/telegram

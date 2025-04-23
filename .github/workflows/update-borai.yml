@@ -1,5 +1,3 @@
-# .github/workflows/update-borai.yml
-
 name: "Publish BORAI"
 
 on:
@@ -16,25 +14,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-go@v3
         with:
-          python-version: '3.12'
+          go-version: '1.21'
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: go mod tidy
       - name: Run resume tests
-        run: python -m pytest resume/tests
+        run: go test ./internal/...
       - name: Run resume script
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-        run: python resume/main.py
+        run: go run ./cmd/resume
       - name: Commit and push
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add data.json
-          git commit -m "update data"
+          git add data/*.json summaries/*.md
+          git commit -m "update daily data and summaries" || echo "No changes to commit"
           git push origin main
       - name: Run urbit publisher script
         env:
@@ -47,7 +43,7 @@ jobs:
           URBIT_SHIP_URL: ${{ secrets.URBIT_SHIP_URL }}
           URBIT_SHIP_CODE: ${{ secrets.URBIT_SHIP_CODE }}
           URBIT_DIARY: ${{ secrets.URBIT_DIARY }}
-        run: python urbit/main.py
+        run: go run ./cmd/urbit
       - name: Run X publisher script
         env:
           X_BEARER: ${{ secrets.X_BEARER }}
@@ -55,22 +51,9 @@ jobs:
           X_API_KEY_SECRET: ${{ secrets.X_API_KEY_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
-          URBIT_SHIP: ${{ secrets.URBIT_SHIP }}
-          URBIT_SHIP_URL: ${{ secrets.URBIT_SHIP_URL }}
-          URBIT_SHIP_CODE: ${{ secrets.URBIT_SHIP_CODE }}
-          URBIT_DIARY: ${{ secrets.URBIT_DIARY }}
-        run: python x/main.py
+        run: go run ./cmd/x
       - name: Run Telegram publisher script
         env:
-          X_BEARER: ${{ secrets.X_BEARER }}
-          X_API_KEY: ${{ secrets.X_API_KEY }}
-          X_API_KEY_SECRET: ${{ secrets.X_API_KEY_SECRET }}
-          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
-          URBIT_SHIP: ${{ secrets.URBIT_SHIP }}
-          URBIT_SHIP_URL: ${{ secrets.URBIT_SHIP_URL }}
-          URBIT_SHIP_CODE: ${{ secrets.URBIT_SHIP_CODE }}
-          URBIT_DIARY: ${{ secrets.URBIT_DIARY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
-        run: python telegram/main.py
+        run: go run ./cmd/telegram
