@@ -19,7 +19,7 @@ MAX_TOKENS = 4096
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
 @retry
-def get_completion(prompt, model="gemini-1.5-flash"): 
+def get_completion(prompt, model="gemini-2.0-flash"): 
     gemini = genai.GenerativeModel(model)
     response = gemini.generate_content(prompt)
     if len(response.candidates) == 0 or len(response.parts) == 0:
