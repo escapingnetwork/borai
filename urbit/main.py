@@ -18,12 +18,12 @@ FILEPATH = './data.json'
 TWEET_MAX_LENGTH = 327
 
 today = str(datetime.datetime.today().strftime('%Y-%m-%d'))
-# today = str(datetime.datetime(2023, 12, 22).strftime('%Y-%m-%d'))
+#today = str(datetime.datetime(2025, 12, 9).strftime('%Y-%m-%d'))
 
 
 def main():
     data = reader(FILEPATH)
-    data = ranker(data, threshold=0) #date= datetime.datetime(2023, 12, 22).date())
+    data = ranker(data, threshold=0) #, date=datetime.datetime(2025, 12, 9).date())
     data = sort_by(data)
     env = Environment(loader=FileSystemLoader('templates'))
 

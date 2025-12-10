@@ -11,6 +11,7 @@ from utils.ranker import ranker
 
 rate_limiter = asyncio.Semaphore(20)
 FILEPATH = './data.json'
+#today = str(datetime.datetime(2025, 12, 9).strftime('%Y-%m-%d'))
 today = str(datetime.datetime.today().strftime('%Y-%m-%d'))
 
 # Get Telegram bot token and chat ID
@@ -42,7 +43,7 @@ async def send_message(message):
 # Example usage
 if __name__ == "__main__":
     data = reader(FILEPATH)
-    data = ranker(data, threshold=0)
+    data = ranker(data, threshold=0) #, date=datetime.datetime(2025, 12, 9).date())
     data = sort_by(data)
 
     env = Environment(loader=FileSystemLoader('templates'))

@@ -1,31 +1,19 @@
-import os
-import time
-from tenacity import retry
 from dotenv import load_dotenv
+
 load_dotenv()
 
-# Google
-import pathlib
-import textwrap
-
-import google.generativeai as genai
-
-# Used to securely store your API key
-# from google.colab import userdata
+from xai_sdk import Client
+from xai_sdk.chat import user
 
 delimiter = "####"
-MAX_TOKENS = 4096
-# openai.api_key  = os.getenv('OPENAI_API_KEY')
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
-@retry
-def get_completion(prompt, model="gemini-2.5-flash"): 
-    gemini = genai.GenerativeModel(model)
-    response = gemini.generate_content(prompt)
-    if len(response.candidates) == 0 or len(response.parts) == 0:
-        print(response)
-        return ""
-    return response.text
+
+def get_completion(prompt, model="grok-4-1-fast"):
+    client = Client()
+    chat = client.chat.create(model=model, messages=[user(prompt)])
+    response = chat.sample()
+    return response.content
+
 
 def summarize(chunks):
     if len(chunks) <= 1:
@@ -39,21 +27,20 @@ def summarize(chunks):
 
     else:
         print(f"{len(chunks)} chunks. Please wait!")
-        initial_response = ''
+        initial_response = ""
         for i, chunk in enumerate(chunks):
             prompt = f"""
                 Resumir el fragmento de un artículo publicado en el Boletín \
                 Oficial de Argentina. \
-                Tener en cuenta que es el trozo {i+1} de {len(chunks)+1} trozos. \
+                Tener en cuenta que es el trozo {i + 1} de {len(chunks)} trozos. \
                 Luego, todos estos trozos serán unificados en el mismo mensaje. \
                 El resultado final tener 140 caracteres maximo, \
                 no decorar con caracteres especiales, ni hashtags, solo texto simple.
-                
+
                 Review: {delimiter}{chunk}{delimiter}
             """
             initial_response += get_completion(prompt)
-            time.sleep(20)
-            print(f"{i+1} done.")
+            print(f"{i + 1} done.")
 
         prompt = f"""
             Resumir el siguiente texto de manera formal en 140 caracteres maximo, \
@@ -64,5 +51,6 @@ def summarize(chunks):
         response = get_completion(prompt)
 
     tags = []
-    
+
     return tags, 0, response
+        # Placeholder for tags extraction (can be implemented later)
