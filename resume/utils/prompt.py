@@ -1,3 +1,4 @@
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,7 +10,8 @@ delimiter = "####"
 
 
 def get_completion(prompt, model="grok-4-1-fast"):
-    client = Client()
+    api_key = os.getenv("XAI_API_KEY")
+    client = Client(api_key=api_key)
     chat = client.chat.create(model=model, messages=[user(prompt)])
     response = chat.sample()
     return response.content

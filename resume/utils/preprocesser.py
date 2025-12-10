@@ -1,3 +1,4 @@
+import os
 import datetime
 
 from xai_sdk import Client
@@ -19,7 +20,8 @@ def chop(
     Returns:
     List of text chunks.
     """
-    client = Client()
+    api_key = os.getenv("XAI_API_KEY")
+    client = Client(api_key=api_key)
     tokens = client.tokenize.tokenize_text(text, model="grok-4-1-fast")
     num_tokens = len(tokens)
 
