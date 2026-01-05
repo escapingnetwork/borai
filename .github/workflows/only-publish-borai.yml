@@ -36,5 +36,4 @@ jobs:
           TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
         run: |
           python urbit/main.py
-          python x/main.py
           python telegram/main.py
