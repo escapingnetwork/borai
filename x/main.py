@@ -1,5 +1,4 @@
 import datetime
-import tweepy
 import os
 import json
 
@@ -8,6 +7,7 @@ import urlock
 import time
 
 from jinja2 import Environment, FileSystemLoader
+from xdk import Client
 
 from utils.reader import reader
 from utils.preprocesser import sort_by
@@ -39,14 +39,13 @@ def main():
         return True
 
     # X
-
-    client = tweepy.Client(bearer_token=os.getenv('X_BEARER'), consumer_key=os.getenv('X_API_KEY'), consumer_secret=os.getenv('X_API_KEY_SECRET'), access_token=os.getenv('X_ACCESS_TOKEN'), access_token_secret=os.getenv('X_ACCESS_TOKEN_SECRET'), wait_on_rate_limit=True)
+    client = Client(bearer_token=os.getenv('X_BEARER'))
 
     types = set([x['type'] for x in data])
     for t in types:
         xPostTemplate = env.get_template('head.j2')
         tweet = xPostTemplate.render(today=today, type=t)
-        original_tweet = client.create_tweet(text=tweet)
+        original_tweet = client.tweets.create_tweet(text=tweet)
         for x in data:
             if t == x['type']:
                 xPostTemplate = env.get_template('post.j2')
@@ -54,16 +53,13 @@ def main():
                 if len(tweet) > TWEET_MAX_LENGTH:
                     xPostTemplate = env.get_template('area.j2')
                     area = xPostTemplate.render(publication=x, today=today, type=x['type'])
-                    reply_tweet = client.create_tweet(text=area, 
-                                            in_reply_to_tweet_id=original_tweet.data['id'])
+                    reply_tweet = client.tweets.create_tweet(text=area, reply_settings={'in_reply_to_tweet_id': original_tweet.data['id']})
                     xPostTemplate = env.get_template('summary.j2')
                     summary = xPostTemplate.render(publication=x, today=today, type=x['type'])
-                    reply2_tweet = client.create_tweet(text=summary, 
-                                                in_reply_to_tweet_id=reply_tweet.data['id'])
+                    reply2_tweet = client.tweets.create_tweet(text=summary, reply_settings={'in_reply_to_tweet_id': reply_tweet.data['id']})
                     original_tweet = reply2_tweet
                 else:   
-                    reply_tweet = client.create_tweet(text=tweet, 
-                                                in_reply_to_tweet_id=original_tweet.data['id'])
+                    reply_tweet = client.tweets.create_tweet(text=tweet, reply_settings={'in_reply_to_tweet_id': original_tweet.data['id']})
                     original_tweet = reply_tweet
 
 

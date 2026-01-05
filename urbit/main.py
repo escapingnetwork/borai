@@ -1,5 +1,4 @@
 import datetime
-import tweepy
 import os
 import json
 
@@ -8,6 +7,7 @@ import urlock
 import time
 
 from jinja2 import Environment, FileSystemLoader
+from xai_sdk import Client
 
 from utils.reader import reader
 from utils.preprocesser import sort_by
@@ -53,12 +53,11 @@ def main():
 
 
     # X
-
-    client = tweepy.Client(bearer_token=os.getenv('X_BEARER'), consumer_key=os.getenv('X_API_KEY'), consumer_secret=os.getenv('X_API_KEY_SECRET'), access_token=os.getenv('X_ACCESS_TOKEN'), access_token_secret=os.getenv('X_ACCESS_TOKEN_SECRET'), wait_on_rate_limit=True)
-
+    client = Client(api_key=os.getenv('X_API_KEY'))
+    
     xResume = env.get_template('notePost.j2')
     resume_tweet = xResume.render(today=today)
-    client.create_tweet(text=resume_tweet)
+    client.post(resume_tweet)
 
 if __name__ == "__main__":
     main()
