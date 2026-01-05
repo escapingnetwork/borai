@@ -7,7 +7,8 @@ import urlock
 import time
 
 from jinja2 import Environment, FileSystemLoader
-from xai_sdk import Client
+from xdk import Client
+from xdk.oauth1_auth import OAuth1
 
 from utils.reader import reader
 from utils.preprocesser import sort_by
@@ -53,11 +54,18 @@ def main():
 
 
     # X
-    client = Client(api_key=os.getenv('X_API_KEY'))
+    oauth1 = OAuth1(
+        api_key=os.getenv('X_API_KEY'),
+        api_secret=os.getenv('X_API_KEY_SECRET'),
+        access_token=os.getenv('X_ACCESS_TOKEN'),
+        access_token_secret=os.getenv('X_ACCESS_TOKEN_SECRET'),
+        callback="http://localhost:8080/callback"
+    )
+    client = Client(auth=oauth1)
     
     xResume = env.get_template('notePost.j2')
     resume_tweet = xResume.render(today=today)
-    client.post(resume_tweet)
+    client.posts.create(body={"text": resume_tweet})
 
 if __name__ == "__main__":
     main()
