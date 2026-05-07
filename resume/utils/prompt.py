@@ -9,7 +9,7 @@ from xai_sdk.chat import user
 delimiter = "####"
 
 
-def get_completion(prompt, model="grok-4-1-fast"):
+def get_completion(prompt, model="grok-4.3"):
     api_key = os.getenv("XAI_API_KEY")
     client = Client(api_key=api_key)
     chat = client.chat.create(model=model, messages=[user(prompt)])
